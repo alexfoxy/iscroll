@@ -1,4 +1,4 @@
-/*! iScroll v5.1.3 ~ (c) 2008-2014 Matteo Spinelli ~ http://cubiq.org/license */
+/*! iScroll v5.1.3 ~ (c) 2008-2015 Matteo Spinelli ~ http://cubiq.org/license */
 (function (window, document, Math) {
 var rAF = window.requestAnimationFrame	||
 	window.webkitRequestAnimationFrame	||
@@ -450,8 +450,9 @@ IScroll.prototype = {
 		absDistX		= Math.abs(this.distX);
 		absDistY		= Math.abs(this.distY);
 
-		// We need to move at least 10 pixels for the scrolling to initiate
-		if ( timestamp - this.endTime > 300 && (absDistX < 10 && absDistY < 10) ) {
+		// We need to move at least the minMoveDistance for the scrolling to initiate
+		var minMoveDistance = this.options.minMoveDistance || 10;
+		if ( timestamp - this.endTime > 300 && (absDistX < minMoveDistance && absDistY < minMoveDistance) ) {
 			return;
 		}
 
@@ -504,10 +505,11 @@ IScroll.prototype = {
 		this.directionY = deltaY > 0 ? -1 : deltaY < 0 ? 1 : 0;
 
 		if ( !this.moved ) {
-			this._execEvent('scrollStart');
+			if( (this.hasHorizontalScroll && absDistX > minMoveDistance) || (this.hasVerticalScroll && absDistY > minMoveDistance)) {
+				this._execEvent('scrollStart');
+				this.moved = true;
+			}
 		}
-
-		this.moved = true;
 
 		this._translate(newX, newY);
 
